@@ -342,7 +342,7 @@ esp_err_t get_root_handler(httpd_req_t *req) {
 
     // html string of page
     snprintf(response, sizeof(response),
-             "<!DOCTYPE HTML><html><head><title>ESP32 - Temperature tool</title><meta name='viewport' content='width=device-width, initial-scale=1.0' charset='UTF-8'><script>function updateTemperature(){fetch('/get_temperature').then(response => response.text()).then(newTemperature => {document.getElementById('temperature').innerText = newTemperature + ' \u00B0C';});}function setThreshold(){var thresholdValue = document.getElementById('threshold').value;fetch('/set_threshold',{method: 'POST',headers: {'Content-Type': 'application/x-www-form-urlencoded',},body: 'threshold=' + thresholdValue,})}function getLast10Temperatures(){fetch('/get_last_10_temperatures').then(response => response.json()).then(data => { const temperatureContainer = document.getElementById('temperature-container'); temperatureContainer.innerHTML = ''; for (let i = 0; i < data.temperature.length; i++) { const newParagraph = document.createElement('p'); newParagraph.innerText = data.temperature[i]; temperatureContainer.appendChild(newParagraph);}});}setInterval(updateTemperature, 2000);setInterval(getLast10Temperatures, 2000);getLast10Temperatures();updateTemperature();</script></head><body><h2>Actual temperature:</h2><p id='temperature'>%.2f &deg;C</p><br /><h2>Set temperature threshold:</h2><input type='number' step='0.1' id='threshold'> <button onclick='setThreshold()'>Set</button><br /><h2>Last 10 temperatures</h2><div id='temperature-container'></div></body></html>", temperature);
+             "<!DOCTYPE HTML><html><head><title>ESP32 - Temperature tool</title><meta name='viewport' content='width=device-width, initial-scale=1.0' charset='UTF-8'><style> h2, p { font-family: Arial, sans-serif; }</style><script>function updateTemperature(){fetch('/get_temperature').then(response => response.text()).then(newTemperature => {document.getElementById('temperature').innerText = newTemperature + ' \u00B0C';});}function setThreshold(){var thresholdValue = document.getElementById('threshold').value;fetch('/set_threshold',{method: 'POST',headers: {'Content-Type': 'application/x-www-form-urlencoded',},body: 'threshold=' + thresholdValue,}); var inputElement = document.getElementById('threshold_button'); var paragraph = document.createElement('p'); paragraph.textContent = 'Threshold set successfully.'; inputElement.insertAdjacentElement('afterend', paragraph); setTimeout(function() { paragraph.parentNode.removeChild(paragraph);}, 3000); }function getLast10Temperatures(){fetch('/get_last_10_temperatures').then(response => response.json()).then(data => { const temperatureContainer = document.getElementById('temperature-container'); temperatureContainer.innerHTML = ''; for (let i = 0; i < data.temperature.length; i++) { const newParagraph = document.createElement('p'); newParagraph.innerText = data.temperature[i]; temperatureContainer.appendChild(newParagraph);}});} setInterval(updateTemperature, 2000);setInterval(getLast10Temperatures, 2000);getLast10Temperatures();updateTemperature();</script></head><body><h2>Actual temperature:</h2><p id='temperature'>%.2f &deg;C</p><h2>Set temperature threshold:</h2><input type='number' step='0.01' id='threshold' min='-50.00'> <button onclick='setThreshold()' id='threshold_button'>Set</button><br /><h2>Last 10 temperatures</h2><div id='temperature-container'></div></body></html>", temperature);
 
     err = httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
     if (err != ESP_OK) {
@@ -430,7 +430,7 @@ static esp_err_t post_set_threshold_handler(httpd_req_t *req) {
 
     gpio_set_level(GPIO_LED, 0);
     threshold = atof(thresh);
-    printf("Threshold set to: %.1f\n", threshold);
+    printf("Threshold set to: %.2f\n", threshold);
 
     return ESP_OK;
 }
@@ -579,7 +579,3 @@ void app_main() {
 }
 
 /*** End of main.c ***/
-
-// TODO
-// styling (aj ze nastavene uspesne) + nemozem necislo, max strop min atd, po 0.1..
-// dokumentacia + video
